@@ -132,7 +132,6 @@ class DifferenceUniformGrid(Difference):
         matrix = sparse.diags(self.stencil, self.j, shape=shape)
         matrix = matrix.tocsr()
         jmin = -np.min(self.j)
-        print(self.j)
         if jmin > 0:
             for i in range(jmin):
                 if isinstance(grid, UniformNonPeriodicGrid):
@@ -168,7 +167,6 @@ class DifferenceUniformGrid(Difference):
                 k[i,j] = (j-idx)**(i)/np.math.factorial(i)
 
         k[0,idx]=1
-        print(k)
         x = np.linalg.solve(k,b)
         x= x.transpose()
         return x

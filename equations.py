@@ -683,7 +683,7 @@ class SchrodingerBCLinear:
 
 class SchrodingerBCNonLinear:
 
-    def __init__(self, c,p, spatial_order, domain):
+    def __init__(self, c, spatial_order, domain,g):
         self.c = c
         self.X = timesteppers.StateVector([c])
         self.t = 0
@@ -700,7 +700,7 @@ class SchrodingerBCNonLinear:
 
         diffx = self.Diffusion(c, dx,dx2,0)
         diffy = self.Diffusion(c,dy,dy2,1)
-        adv = self.Advection(c,p,x,y)
+        adv = self.Advection(c,g,x,y)
         
         self.ts_x = timesteppers.CrankNicolson(diffx, 0)
         self.ts_y = timesteppers.CrankNicolson(diffy, 1)
@@ -720,7 +720,7 @@ class SchrodingerBCNonLinear:
 
             L = dx2.matrix.astype(complex)
             L=L.tocsr()
-            L = L*(-1j)
+            L = L*(-1j)/2
             L[0,:] = 0
             L[-1,:] = 0
             L[0,0] = 1
@@ -731,7 +731,7 @@ class SchrodingerBCNonLinear:
     
     class Advection:
 
-        def __init__(self,c,p,x,y):
+        def __init__(self,c,g,x,y):
             self.X = timesteppers.StateVector([c])
 
             N = len(c)
@@ -754,8 +754,8 @@ class SchrodingerBCNonLinear:
 
 
             def f(X):
-                adv = X.data*abs(X.data)**p
-                return -1j*adv
+                adv = X.data*abs(X.data)**2
+                return -1j*adv*g
 
             self.F =f
 
