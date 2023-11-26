@@ -97,13 +97,14 @@ class SchrodingerBCNonLinear:
         self.t = self.t+dt
         self.iter = self.iter+1
     
-        self.ts_adv.step(dt/2)
+     
         self.ts_y.step(dt/2)
         self.ts_x.step(dt/2)
+        self.ts_adv.step(dt/2)
+        self.ts_adv.step(dt/2)
         self.ts_x.step(dt/2)
         self.ts_y.step(dt/2)
-        self.ts_adv.step(dt/2)
-
+        
         
 class SchrodingerBCLinearSlit:
 
@@ -195,7 +196,8 @@ class SchrodingerBCLinearSlit:
        
         self.ts_y.step(dt/2)
         self.ts_x.step(dt/2)
-        self.ts_adv.step(dt)
+        self.ts_adv.step(dt/2)
+        self.ts_adv.step(dt/2)
         self.ts_x.step(dt/2)
         self.ts_y.step(dt/2)
            
