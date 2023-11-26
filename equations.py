@@ -108,7 +108,7 @@ class SchrodingerBCNonLinear:
         
 class SchrodingerBCLinearSlit:
 
-    def __init__(self, c, spatial_order, domain):
+    def __init__(self, c, spatial_order, domain,g):
         self.c = c
         self.X = timesteppers.StateVector([c])
         self.t = 0
@@ -125,7 +125,7 @@ class SchrodingerBCLinearSlit:
 
         diffx = self.Diffusion(c, dx,dx2,0)
         diffy = self.Diffusion(c,dy,dy2,1)
-        adv = self.Advection(c)
+        adv = self.Advection(c,g)
         
         self.ts_x = timesteppers.CrankNicolson(diffx, 0)
         self.ts_y = timesteppers.CrankNicolson(diffy, 1)
@@ -155,7 +155,7 @@ class SchrodingerBCLinearSlit:
             
     class Advection:
 
-        def __init__(self,c):
+        def __init__(self,c,g):
             self.X = timesteppers.StateVector([c])
 
             N = len(c)
@@ -178,7 +178,8 @@ class SchrodingerBCLinearSlit:
 
 
             def f(X):
-                return 0
+                adv = X.data*abs(X.data)**2
+                return -1j*adv*g
 
             self.F =f
 
