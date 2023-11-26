@@ -63,38 +63,6 @@ class ImplicitTimestepper(Timestepper):
             raise ValueError("Can only do implicit timestepping on first or last axis")
 
 
-class ForwardEuler(ExplicitTimestepper):
-
-    def _step(self, dt):
-        return self.X.data + dt*self.F(self.X)
-
-
-class LaxFriedrichs(ExplicitTimestepper):
-
-    def __init__(self, eq_set):
-        super().__init__(eq_set)
-        N = len(X.data)
-        A = sparse.diags([1/2, 1/2], offsets=[-1, 1], shape=[N, N])
-        A = A.tocsr()
-        A[0, -1] = 1/2
-        A[-1, 0] = 1/2
-        self.A = A
-
-    def _step(self, dt):
-        return self.A @ self.X.data + dt*self.F(self.X)
-
-
-class Leapfrog(ExplicitTimestepper):
-
-    def _step(self, dt):
-        if self.iter == 0:
-            self.X_old = np.copy(self.X.data)
-            return self.X + dt*self.F(self.X)
-        else:
-            X_temp = self.X_old + 2*dt*self.F(self.X)
-            self.X_old = np.copy(self.X)
-            return X_temp
-
 
 class Multistage(ExplicitTimestepper):
 
@@ -143,47 +111,6 @@ def RK22(eq_set):
     return Multistage(eq_set, 2, a, b)
 
 
-class AdamsBashforth(ExplicitTimestepper):
-
-    def __init__(self, eq_set, steps):
-        super().__init__(eq_set)
-        self.steps = steps
-        self.f_list = deque()
-        for i in range(self.steps):
-            self.f_list.append(np.copy(X.data))
-
-    def _step(self, dt):
-        f_list = self.f_list
-        f_list.rotate()
-        f_list[0] = self.F(self.X)
-        if self.iter < self.steps:
-            coeffs = self._coeffs(self.iter+1)
-        else:
-            coeffs = self._coeffs(self.steps)
-
-        for i, coeff in enumerate(coeffs):
-            self.X.data += self.dt*coeff*self.f_list[i].data
-        return self.X.data
-
-    def _coeffs(self, num):
-        i = (1 + np.arange(num))[None, :]
-        j = (1 + np.arange(num))[:, None]
-        S = (-i)**(j-1)/factorial(j-1)
-
-        b = (-1)**(j+1)/factorial(j)
-
-        a = np.linalg.solve(S, b)
-        return a
-
-
-class BackwardEuler(ImplicitTimestepper):
-
-    def _step(self, dt):
-        if dt != self.dt:
-            self.LHS = self.M + dt*self.L
-            self.LU = spla.splu(self.LHS.tocsc(), permc_spec='NATURAL')
-        return self._LUsolve(self.X.data)
-
 
 class CrankNicolson(ImplicitTimestepper):
 
@@ -194,14 +121,6 @@ class CrankNicolson(ImplicitTimestepper):
             self.LU = spla.splu(self.LHS.tocsc(), permc_spec='NATURAL')
         return self._LUsolve(apply_matrix(self.RHS, self.X.data, self.axis))
 
-
-class BackwardDifferentiationFormula(ImplicitTimestepper):
-
-    def __init__(self, u, L, steps):
-        pass
-
-    def _step(self, dt):
-        pass
 
 
 class StateVector:
@@ -224,141 +143,4 @@ class StateVector:
     def scatter(self):
         for i, var in enumerate(self.variables):
             np.copyto(var, self.data[axslice(self.axis, i*self.N, (i+1)*self.N)])
-
-
-class IMEXTimestepper(Timestepper):
-
-    def __init__(self, eq_set):
-        super().__init__()
-        self.X = eq_set.X
-        self.M = eq_set.M
-        self.L = eq_set.L
-        self.F = eq_set.F
-
-    def step(self, dt):
-        self.X.data = self._step(dt)
-        self.X.scatter()
-        self.dt = dt
-        self.t += dt
-        self.iter += 1
-
-
-class Euler(IMEXTimestepper):
-
-    def _step(self, dt):
-        if dt != self.dt:
-            LHS = self.M + dt*self.L
-            self.LU = spla.splu(LHS.tocsc(), permc_spec='NATURAL')
-        
-        RHS = self.M @ self.X.data + dt*self.F(self.X)
-        return self.LU.solve(RHS)
-
-
-class CNAB(IMEXTimestepper):
-
-    def _step(self, dt):
-        if self.iter == 0:
-            # Euler
-            LHS = self.M + dt*self.L
-            LU = spla.splu(LHS.tocsc(), permc_spec='NATURAL')
-
-            self.FX = self.F(self.X)
-            RHS = self.M @ self.X.data + dt*self.FX
-            self.FX_old = self.FX
-            return LU.solve(RHS)
-        else:
-            if dt != self.dt or self.iter == 1:
-                LHS = self.M + dt/2*self.L
-                self.LU = spla.splu(LHS.tocsc(), permc_spec='NATURAL')
-
-            self.FX = self.F(self.X)
-            RHS = self.M @ self.X.data - 0.5*dt*self.L @ self.X.data + 3/2*dt*self.FX - 1/2*dt*self.FX_old
-            self.FX_old = self.FX
-            return self.LU.solve(RHS)
-
-
-class BDFExtrapolate(IMEXTimestepper):
-
-    def __init__(self, eq_set, steps):
-        super().__init__(eq_set)
-        self.steps = steps
-        pass
-
-    def _step(self, dt):
-        pass
-
-class FullyImplicitTimestepper(Timestepper):
-
-    def __init__(self, eq_set, tol=1e-5):
-        super().__init__()
-        self.X = eq_set.X
-        self.M = eq_set.M
-        self.L = eq_set.L
-        self.F = eq_set.F
-        self.tol = tol
-        self.J = eq_set.J
-
-    def step(self, dt, guess=None):
-        self.X.gather()
-        self.X.data = self._step(dt, guess)
-        self.X.scatter()
-        self.t += dt
-        self.iter += 1
-
-
-class BackwardEulerFI(FullyImplicitTimestepper):
-
-    def _step(self, dt, guess):
-        if dt != self.dt:
-            self.LHS_matrix = self.M + dt*self.L
-            self.dt = dt
-
-        RHS = self.M @ self.X.data
-        if not (guess is None):
-            self.X.data[:] = guess
-        F = self.F(self.X)
-        LHS = self.LHS_matrix @ self.X.data - dt * F
-        residual = LHS - RHS
-        i_loop = 0
-        while np.max(np.abs(residual)) > self.tol:
-            jac = self.M + dt*self.L - dt*self.J(self.X)
-            dX = spla.spsolve(jac, -residual)
-            self.X.data += dX
-            F = self.F(self.X)
-            LHS = self.LHS_matrix @ self.X.data - dt * F
-            residual = LHS - RHS
-            i_loop += 1
-            if i_loop > 20:
-                print('error: reached more than 20 iterations')
-                break
-        return self.X.data
-
-
-class CrankNicolsonFI(FullyImplicitTimestepper):
-
-    def _step(self, dt, guess):
-        if dt != self.dt:
-            self.LHS_matrix = self.M + dt/2*self.L
-            self.dt = dt
-
-        
-        if not (guess is None):
-            self.X.data[:] = guess
-        F = self.F(self.X)
-        RHS = self.M @ self.X.data - dt/2*self.L @ self.X.data + dt/2 * F
-        LHS = self.LHS_matrix @ self.X.data - dt/2 * F
-        residual = LHS - RHS
-        i_loop = 0
-        while np.max(np.abs(residual)) > self.tol:
-            jac = self.M + dt/2*self.L - dt/2*self.J(self.X)
-            dX = spla.spsolve(jac, -residual)
-            self.X.data += dX
-            F = self.F(self.X)
-            LHS = self.LHS_matrix @ self.X.data - dt/2 * F
-            residual = LHS - RHS
-            i_loop += 1
-            if i_loop > 20:
-                print('error: reached more than 20 iterations')
-                break
-        return self.X.data
 
