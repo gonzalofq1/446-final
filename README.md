@@ -16,8 +16,8 @@ We assume a square uniform domain, but the values and resolution of this domain 
 
 To change the ratio of the timestep size to grad spacing $\alpha = dt/dx$, the variable `alpha` can be changed.
 
-To monitor the simulation time, the instance variable `t` can be accessed and compared against desired values.
+To monitor the simulation time, the instance variable `t` can be accessed and compared against desired values. Or more simply, the variable `T` in `SchrodingerPDE.ipynb` can be used to set the final time.
 
 To change the initial conditions, the definition of `IC` can be changed.
 
-Changing the boundary conditions is a little less straightforward. To use different boundary conditions, go to `equations.py` and create a copy of the `SchrodingerBCNonLinear` and change the function `BC` in the `Advection` sub-class to fit your needs. An example of this can be seen in the class `SchrodingerBCLinearSlit`.
+Changing the boundary conditions is a little less straightforward. To use different boundary conditions, go to `equations.py` and create a copy of the `SchrodingerBCNonLinear` and change the function `BC` in the `Reaction` sub-class to fit your needs. An example of this can be seen in the class `SchrodingerBCLinearSlit`. However, it must be noted that any boundary conditions will be set in addition to particle-in-box condition which is set implictly in the diffusion timestepper.
