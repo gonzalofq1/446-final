@@ -26,7 +26,7 @@ class SchrodingerBCNonLinear:
 
         diffx = self.Diffusion(c, dx,dx2,0)
         diffy = self.Diffusion(c,dy,dy2,1)
-        adv = self.Advection(c,g,x,y)
+        adv = self.Reaction(c,g,x,y)
         
         self.ts_x = timesteppers.CrankNicolson(diffx, 0)
         self.ts_y = timesteppers.CrankNicolson(diffy, 1)
@@ -55,7 +55,7 @@ class SchrodingerBCNonLinear:
             self.L = L
 
     
-    class Advection:
+    class Reaction:
 
         def __init__(self,c,g,x,y):
             self.X = timesteppers.StateVector([c])
@@ -125,7 +125,7 @@ class SchrodingerBCLinearSlit:
 
         diffx = self.Diffusion(c, dx,dx2,0)
         diffy = self.Diffusion(c,dy,dy2,1)
-        adv = self.Advection(c,g)
+        adv = self.Reaction(c,g)
         
         self.ts_x = timesteppers.CrankNicolson(diffx, 0)
         self.ts_y = timesteppers.CrankNicolson(diffy, 1)
@@ -153,7 +153,7 @@ class SchrodingerBCLinearSlit:
             L.eliminate_zeros()
             self.L = L
             
-    class Advection:
+    class Reaction:
 
         def __init__(self,c,g):
             self.X = timesteppers.StateVector([c])
