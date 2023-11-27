@@ -26,11 +26,11 @@ class SchrodingerBCNonLinear:
 
         diffx = self.Diffusion(c, dx,dx2,0)
         diffy = self.Diffusion(c,dy,dy2,1)
-        adv = self.Advection(c,g,x,y)
+        rec = self.Reaction(c,g,x,y)
         
         self.ts_x = timesteppers.CrankNicolson(diffx, 0)
         self.ts_y = timesteppers.CrankNicolson(diffy, 1)
-        self.ts_adv = timesteppers.RK22(adv)
+        self.ts_rec = timesteppers.RK22(rec)
 
     class Diffusion:
 
@@ -55,7 +55,7 @@ class SchrodingerBCNonLinear:
             self.L = L
 
     
-    class Advection:
+    class Reaction:
 
         def __init__(self,c,g,x,y):
             self.X = timesteppers.StateVector([c])
@@ -80,8 +80,8 @@ class SchrodingerBCNonLinear:
 
 
             def f(X):
-                adv = X.data*abs(X.data)**2
-                return -1j*adv*g
+                rec = X.data*abs(X.data)**2
+                return -1j*rec*g
 
             self.F =f
 
@@ -100,8 +100,8 @@ class SchrodingerBCNonLinear:
      
         self.ts_y.step(dt/2)
         self.ts_x.step(dt/2)
-        self.ts_adv.step(dt/2)
-        self.ts_adv.step(dt/2)
+        self.ts_rec.step(dt/2)
+        self.ts_rec.step(dt/2)
         self.ts_x.step(dt/2)
         self.ts_y.step(dt/2)
         
@@ -125,11 +125,11 @@ class SchrodingerBCLinearSlit:
 
         diffx = self.Diffusion(c, dx,dx2,0)
         diffy = self.Diffusion(c,dy,dy2,1)
-        adv = self.Advection(c,g)
+        rec = self.Reaction(c,g)
         
         self.ts_x = timesteppers.CrankNicolson(diffx, 0)
         self.ts_y = timesteppers.CrankNicolson(diffy, 1)
-        self.ts_adv = timesteppers.RK22(adv)
+        self.ts_rec = timesteppers.RK22(rec)
 
     class Diffusion:
 
@@ -153,7 +153,7 @@ class SchrodingerBCLinearSlit:
             L.eliminate_zeros()
             self.L = L
             
-    class Advection:
+    class Reaction:
 
         def __init__(self,c,g):
             self.X = timesteppers.StateVector([c])
@@ -178,8 +178,8 @@ class SchrodingerBCLinearSlit:
 
 
             def f(X):
-                adv = X.data*abs(X.data)**2
-                return -1j*adv*g
+                rec = X.data*abs(X.data)**2
+                return -1j*rec*g
 
             self.F =f
 
@@ -197,8 +197,8 @@ class SchrodingerBCLinearSlit:
        
         self.ts_y.step(dt/2)
         self.ts_x.step(dt/2)
-        self.ts_adv.step(dt/2)
-        self.ts_adv.step(dt/2)
+        self.ts_rec.step(dt/2)
+        self.ts_rec.step(dt/2)
         self.ts_x.step(dt/2)
         self.ts_y.step(dt/2)
            
