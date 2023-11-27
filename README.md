@@ -10,14 +10,14 @@ Equation.pdf), simply run the scripts in `SchrodingerPDE.ipynb` using a Python K
 
 # Changing Simulation Parameters
 
-Most simulation parameters can be conveniently changed in `SchrodingerPDE.ipynb` by creating an instance of the equations.SchrodingerBCNonLinear class with desired parameters and taking the desired number of time steps.
+Most simulation parameters can be conveniently changed in `SchrodingerPDE.ipynb` by creating an instance of the `equations.SchrodingerBCNonLinear` class with desired parameters and taking the desired number of time steps.
 
 We assume a square uniform domain, but the values and resolution of this domain can be adjusted by changing the vairables `grid_x`, `grid_y`, and `resolution`.
 
-To change the ratio of the timestep size to grad spacing $\frac{dt}{dx}$, the variable `alpha` can be changed.
+To change the ratio of the timestep size to grad spacing $\alpha = dt/dx$ $\frac{dt}{dx}$, the variable `alpha` can be changed.
 
 To monitor the simulation time, the instance variable `t` can be accessed and compared against desired values.
 
 To change the initial conditions, the definition of `IC` can be changed.
 
-Changing the boundary conditions is a little less straightforward. To use different boundary conditions, go to equations.py and create a copy of the SchrodingerBCNonLinear and change the function BC(X) in the Advection sub-class to fit your needs. An example of this can be seen in the class SchrodingerBCLinearSlit.
+Changing the boundary conditions is a little less straightforward. To use different boundary conditions, go to `equations.py` and create a copy of the `SchrodingerBCNonLinear` and change the function `BC(X)` in the `Advection` sub-class to fit your needs. An example of this can be seen in the class `SchrodingerBCLinearSlit`.
