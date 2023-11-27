@@ -5,8 +5,8 @@ This is the the code for the final project for ESAM 446 with Prof. Daniel Lecoan
 
 # Running the code
 
-To regenerate the simulations presented in our report (Numerical Solution for the Nonlinear Schrodinger
-Equation.pdf), simply run the scripts in `SchrodingerPDE.ipynb` using a Python Kernel. This Jupyter notebook includes the code for all of our simulations and visualizations
+To regenerate the simulations presented in our report `Numerical Solution for the Nonlinear Schrodinger
+Equation.pdf`, simply run the scripts in `SchrodingerPDE.ipynb` using a Python Kernel. This Jupyter notebook includes the code for all of our simulations and visualizations
 
 # Changing Simulation Parameters
 
@@ -14,7 +14,7 @@ Most simulation parameters can be conveniently changed in `SchrodingerPDE.ipynb`
 
 We assume a square uniform domain, but the values and resolution of this domain can be adjusted by changing the vairables `grid_x`, `grid_y`, and `resolution`.
 
-To change the ratio of the timestep size to grad spacing $\alpha = dt/dx$ $\frac{dt}{dx}$, the variable `alpha` can be changed.
+To change the ratio of the timestep size to grad spacing $\alpha = dt/dx$, the variable `alpha` can be changed.
 
 To monitor the simulation time, the instance variable `t` can be accessed and compared against desired values.
 
